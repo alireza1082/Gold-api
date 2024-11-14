@@ -1,14 +1,12 @@
-import os
-import sys
-
 import requests
-from clint.textui import progress
+
+import config
 
 
-def get_price_from_tgju(pkg, path, string):
+def get_price_from_tgju():
     url = "https://one-api.ir/price/"
     # one-api token
-    token = '**************'
+    token = config.api_token
     parameters = {
         'token': token,
         'action': 'tgju'
@@ -28,10 +26,10 @@ def get_price_from_tgju(pkg, path, string):
     print(link)
 
 
-def get_price_from_bonbast(pkg, path, string):
+def get_price_from_bonbast():
     url = "https://one-api.ir/price/"
     # one-api token
-    token = '***********'
+    token = config.api_token
     parameters = {
         'token': token,
         'action': 'bonbast'
@@ -49,7 +47,3 @@ def get_price_from_bonbast(pkg, path, string):
         return
     link = response.json()['result']['gol18']
     print(link)
-
-
-if __name__ == '__main__':
-    get_price_from_bonbast("com.BrainLadder.GhashangAbad", "/Downloads/", "")
