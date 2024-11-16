@@ -19,7 +19,7 @@ def get_tgju_price():
             print("page not downloaded beautiful or structure changed")
             return 0
         version = soup.text
-        new_version = ''.join((ch if ch in '0123456789.' else '') for ch in version)
+        new_version = ''.join((ch if ch in '0123456789' else '') for ch in version)
         print(new_version[:-1])
         if new_version is not None:
             return new_version[:-1]
@@ -45,7 +45,7 @@ def get_tala_price():
         version = soup.text
         version_en = digits.fa_to_en(version)
         # check version name if it has words and remove words
-        new_version = ''.join((ch if ch in '0123456789.' else '') for ch in version_en)
+        new_version = ''.join((ch if ch in '0123456789' else '') for ch in version_en)
         # build array of versionName split by .
         print(new_version)
         return new_version

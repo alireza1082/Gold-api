@@ -1,12 +1,12 @@
 import requests
 
-import config
+from config import config_api
 
 
 def get_price_from_tgju():
     url = "https://one-api.ir/price/"
     # one-api token
-    token = config.api_token
+    token = config_api.api_token
     parameters = {
         'token': token,
         'action': 'tgju'
@@ -18,18 +18,20 @@ def get_price_from_tgju():
             print("request failed with status 404")
             return
         else:
-            print("request successfully.")
+            print("request successfully on tgju.")
     else:
         print("failed on tgju api")
         return
     link = response.json()['result']['gold']['geram18']['p']
-    print(link)
+    new_version = ''.join((ch if ch in '0123456789' else '') for ch in link)
+    print(new_version[:-1])
+    return new_version[:-1]
 
 
 def get_price_from_bonbast():
     url = "https://one-api.ir/price/"
     # one-api token
-    token = config.api_token
+    token = config_api.api_token
     parameters = {
         'token': token,
         'action': 'bonbast'
@@ -41,9 +43,11 @@ def get_price_from_bonbast():
             print("request failed with status 404")
             return
         else:
-            print("request successfully.")
+            print("request successfully on Bonbast.")
     else:
         print("failed on tgju api")
         return
     link = response.json()['result']['gol18']
-    print(link)
+    new_version = ''.join((ch if ch in '0123456789' else '') for ch in link)
+    print(new_version)
+    return new_version
