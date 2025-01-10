@@ -4,7 +4,6 @@ from config import config_api
 
 
 def get_price_from_tgju():
-    return "0"
     url = "https://one-api.ir/price/"
     # one-api token
     token = config_api.api_token
