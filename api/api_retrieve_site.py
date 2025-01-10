@@ -13,22 +13,22 @@ def get_tgju_price():
         # arrange file by html tags
         if resp.status_code == 404:
             print("server not responding")
-            return 0
+            return "0"
         soup = BeautifulSoup(resp.text, 'html.parser').find("span", {"data-col": "info.last_trade.PDrCotVal"})
         if soup is None:
             print("page not downloaded beautiful or structure changed")
-            return 0
+            return "0"
         version = soup.text
         new_version = ''.join((ch if ch in '0123456789' else '') for ch in version)
         print(new_version[:-1])
         if new_version is not None:
             return new_version[:-1]
         else:
-            return 0
+            return "0"
     except Exception as ex:
         print("an error occurred in checking " + server_name)
         print(ex)
-        return 0
+        return "0"
 
 
 def get_tala_price():
@@ -38,7 +38,7 @@ def get_tala_price():
         resp = requests.get(url)
         if resp.status_code == 404:
             print("server not responding or structure changed")
-            return 0
+            return "0"
         # arrange file by html tags
         soup = BeautifulSoup(resp.text, 'html.parser').find("h3", {"class": "bg-green-light"})
         # get version by text of before element
@@ -52,4 +52,4 @@ def get_tala_price():
     except Exception as ex:
         print("an error occurred in checking " + server_name)
         print(ex)
-        return 0
+        return "0"

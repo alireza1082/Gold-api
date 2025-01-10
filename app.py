@@ -15,6 +15,9 @@ def gold_price():
     bon = api.get_price_from_bonbast()
     if tgju > bon:
         return tgju
-    if bon == 0:
+    if bon == "0":
         abort(404, description="Resource not found")
     return bon
+
+
+print(gold_price())
