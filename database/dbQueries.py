@@ -3,15 +3,13 @@ from datetime import datetime
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
-BASE_DIC = {"name": "LastGoldPrice"}
-BASE_TIME = 15 * 60
-MAX_VALID_TIME = 3 * 60 * 60
+import database.consts as consts
 
 
 def connect():
     try:
         time = datetime.now().timestamp()
-        # Connect with the portnumber and host
+        # Connect with the port number and host
         command_client = MongoClient("mongodb://localhost:27017/")
         client = MongoClient("localhost", 27017)
         print("Connected to DB successfully")
@@ -39,7 +37,7 @@ def is_update_required(client):
 
     if last_update_time is None:
         return True
-    elif datetime.now().timestamp() - BASE_TIME > last_update_time:
+    elif datetime.now().timestamp() - consts.BASE_TIME > last_update_time:
         return True
     else:
         return False
@@ -51,7 +49,7 @@ def is_update_valid(client):
 
     if last_update_time is None:
         return False
-    elif datetime.now().timestamp() - MAX_VALID_TIME < last_update_time:
+    elif datetime.now().timestamp() - consts.MAX_VALID_TIME < last_update_time:
         return True
     else:
         return False
@@ -64,6 +62,6 @@ def get_dict(price):
 def update_last_price(client, price):
     collection = client.gold_db["gold_price"]
     collection.update_one(
-        BASE_DIC,
+        consts.BASE_DIC,
         {"$set": {"price": price, "time": datetime.now().timestamp()}},
     )
