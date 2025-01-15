@@ -4,12 +4,18 @@ import redis
 from redis import RedisError
 
 import database.consts as consts
+import config.config_api as conf
 
 
 def connect():
     try:
         # Connect with the port number and host
-        client = redis.Redis(host='localhost', port=6379, db=0)
+        client = redis.Redis(
+            host=conf.redis_host,
+            port=conf.redis_port,
+            db=conf.redis_db,
+            password=conf.redis_password)
+
         print("Connected to DB successfully")
         return client
     except RedisError as error:
@@ -48,8 +54,9 @@ def is_update_valid(client):
 def update_last_price(client, price):
     timestamp = int(round(datetime.now().timestamp()))
     print("Updating last price", price, timestamp)
-    client.set("price", price)
+
     pip = client.pipeline()
     pip.set("timestamp", timestamp)
     pip.set("price", price)
+
     return pip.execute()
