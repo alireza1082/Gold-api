@@ -28,8 +28,8 @@ def get_price_from_tgju():
     print(response.json()['status'])
     link = response.json()['result']['gold']['geram18']['p']
     new_version = ''.join((ch if ch in '0123456789' else '') for ch in link)
-    print(new_version[:-1])
     rond = int(new_version[:-4])
+    print("price on tgju api is: ", str(rond + 1))
     return str(rond + 1)
 
 
@@ -57,6 +57,6 @@ def get_price_from_bonbast():
         return "0"
     link = response.json()['result']['gol18']
     new_version = ''.join((ch if ch in '0123456789' else '') for ch in link)
-    print(new_version)
     rond = int(new_version[:-3])
+    print("price on bon api is: ", str(rond + 1))
     return str(rond + 1)

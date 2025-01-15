@@ -20,9 +20,10 @@ def get_tgju_price():
             return "0"
         version = soup.text
         new_version = ''.join((ch if ch in '0123456789' else '') for ch in version)
-        print(new_version[:-1])
         if new_version is not None:
-            return new_version[:-1]
+            rond = int(new_version[:-4])
+            print("price on tgju site is: ", str(rond + 1))
+            return str(rond + 1)
         else:
             return "0"
     except Exception as ex:
@@ -46,9 +47,9 @@ def get_tala_price():
         version_en = digits.fa_to_en(version)
         # check version name if it has words and remove words
         new_version = ''.join((ch if ch in '0123456789' else '') for ch in version_en)
-        # build array of versionName split by .
-        print(new_version)
-        return new_version
+        rond = int(new_version[:-3])
+        print("price on tala site is: ", str(rond + 1))
+        return str(rond + 1)
     except Exception as ex:
         print("an error occurred in checking " + server_name)
         print(ex)

@@ -1,7 +1,6 @@
 from flask import Flask
-from werkzeug.exceptions import abort
 
-import api.api_price as api
+import retriever
 
 app = Flask(__name__)
 
@@ -13,10 +12,4 @@ def hello_world():
 
 @app.route("/gold")
 def gold_price():
-    tgju = api.get_price_from_tgju()
-    bon = api.get_price_from_bonbast()
-    if tgju > bon:
-        return tgju
-    if bon == "0":
-        abort(404, description="Resource not found")
-    return bon
+    return retriever.get_price()

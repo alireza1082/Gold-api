@@ -23,10 +23,11 @@ def get_last_price(client):
 
 def is_update_required(client):
     last_update_time = client.get("timestamp")
+    timestamp = int(round(datetime.now().timestamp()))
 
     if last_update_time is None:
         return True
-    elif datetime.now().timestamp() - consts.BASE_TIME > last_update_time:
+    elif timestamp - consts.BASE_TIME > int(last_update_time):
         return True
     else:
         return False
@@ -34,16 +35,21 @@ def is_update_required(client):
 
 def is_update_valid(client):
     last_update_time = client.get("timestamp")
+    timestamp = int(round(datetime.now().timestamp()))
 
     if last_update_time is None:
         return False
-    elif datetime.now().timestamp() - consts.MAX_VALID_TIME < last_update_time:
+    elif timestamp - consts.MAX_VALID_TIME < int(last_update_time):
         return True
     else:
         return False
 
+
 def update_last_price(client, price):
+    timestamp = int(round(datetime.now().timestamp()))
+    print("Updating last price", price, timestamp)
+    client.set("price", price)
     pip = client.pipeline()
-    pip.set("timestamp", datetime.now().timestamp())
+    pip.set("timestamp", timestamp)
     pip.set("price", price)
     return pip.execute()
