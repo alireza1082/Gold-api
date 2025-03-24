@@ -60,3 +60,14 @@ def update_last_price(client, price):
     pip.set("price", price)
 
     return pip.execute()
+
+def increase_counter(client):
+    counter = client.get("counter")
+
+    if counter is None:
+        counter = 1
+        client.pipeline().set("counter", counter)
+    else:
+        counter += 1
+        client.pipeline().set("counter", counter)
+    return counter
