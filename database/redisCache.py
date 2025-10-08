@@ -19,7 +19,7 @@ def connect():
         print("Connected to DB successfully")
         return client
     except RedisError as error:
-        print("Could not connect to MongoDB with error: ", error)
+        print("Could not connect to Redis with error: ", error)
         return None
 
 
@@ -65,13 +65,16 @@ def update_last_price(client, price):
 def increase_counter(client, req_type):
     counter = client.get(f"counter_{req_type}")
 
+    pip = client.pipeline()
+
     if counter is None:
         counter = 1
-        client.pipeline().set(f"counter_{req_type}", counter)
+        pip.set(f"counter_{req_type}", counter)
     else:
         counter += 1
-        client.pipeline().set(f"counter_{req_type}", counter)
-    return counter
+        pip.set(f"counter_{req_type}", counter)
+
+    return pip.execute()
 
 
 def get_counter(client):
