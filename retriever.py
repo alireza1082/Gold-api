@@ -64,4 +64,4 @@ def get_gold_price_from_api():
 
 def get_counter():
     redis = dB.connect()
-    dB.get_counter(redis)
+    return dB.get_counter(redis)
