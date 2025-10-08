@@ -68,11 +68,9 @@ def increase_counter(client, req_type):
     pip = client.pipeline()
 
     if counter is None:
-        counter = 1
-        pip.set(f"counter_{req_type}", counter)
+        pip.set(f"counter_{req_type}", 1)
     else:
-        counter += 1
-        pip.set(f"counter_{req_type}", counter)
+        pip.set(f"counter_{req_type}", int(counter) + 1)
 
     return pip.execute()
 
