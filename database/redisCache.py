@@ -3,8 +3,8 @@ from datetime import datetime
 import redis
 from redis import RedisError
 
-import database.consts as consts
 import config.config_api as conf
+import database.consts as consts
 
 
 def connect():
@@ -61,13 +61,50 @@ def update_last_price(client, price):
 
     return pip.execute()
 
-def increase_counter(client):
-    counter = client.get("counter")
+
+def increase_counter(client, req_type):
+    counter = client.get(f"counter_{req_type}")
 
     if counter is None:
         counter = 1
-        client.pipeline().set("counter", counter)
+        client.pipeline().set(f"counter_{req_type}", counter)
     else:
         counter += 1
-        client.pipeline().set("counter", counter)
+        client.pipeline().set(f"counter_{req_type}", counter)
     return counter
+
+
+def get_counter(client):
+    counter_gold = client.get("counter_gold")
+    counter_usd = client.get("counter_usd")
+    return {
+        "counter_usd": counter_usd,
+        "counter_gold": counter_gold,
+    }
+
+
+def get_last_price_usd(client):
+    return client.get("price_usd")
+
+
+def update_last_price_usd(client, price):
+    timestamp = int(round(datetime.now().timestamp()))
+    print("Updating last price", price, timestamp)
+
+    pip = client.pipeline()
+    pip.set("time_usd", timestamp)
+    pip.set("price_usd", price)
+
+    return pip.execute()
+
+
+def is_update_required_usd(client):
+    last_update_time = client.get("time_usd")
+    timestamp = int(round(datetime.now().timestamp()))
+
+    if last_update_time is None:
+        return True
+    elif timestamp - consts.BASE_TIME_USD > int(last_update_time):
+        return True
+    else:
+        return False
