@@ -68,9 +68,10 @@ def increase_counter(client, req_type):
     pip = client.pipeline()
 
     if counter is None:
-        pip.set(f"counter_{req_type}", 1)
+        pip.set(f"counter_{req_type}", "1")
     else:
-        pip.set(f"counter_{req_type}", int(counter) + 1)
+        temp = int(counter) + 1
+        pip.set(f"counter_{req_type}", temp)
 
     return pip.execute()
 
@@ -79,8 +80,8 @@ def get_counter(client):
     counter_gold = client.get("counter_gold")
     counter_usd = client.get("counter_usd")
     return {
-        "counter_usd": counter_usd,
-        "counter_gold": counter_gold,
+        "counter_usd": str(counter_usd),
+        "counter_gold": str(counter_gold),
     }
 
 
