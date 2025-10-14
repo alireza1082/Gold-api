@@ -90,4 +90,4 @@ def get_usd_brs():
         if pr['symbol'] == 'USD':
             print(pr)
             price = pr['price']
-    return int(price / 10)
+    return str(int(price / 10))

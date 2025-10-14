@@ -34,8 +34,8 @@ def get_usd_price():
         print("DB update required for usd!")
         price = api.get_usd_brs()
         if price is not None:
-            print("returned price: " + str(price))
-            dB.update_last_price_usd(redis, str(price))
+            print("returned price: " + price)
+            dB.update_last_price_usd(redis, price)
             return price
         if price is None:
             print("Api brs not responding!!")
