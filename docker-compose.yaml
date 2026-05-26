@@ -1,0 +1,21 @@
+services:
+  gold:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gold-price
+    ports:
+      - "8080:5000"
+    networks:
+      - internal
+
+  redis:
+    image: redis:7
+    container_name: redis-gold
+    restart: always
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
