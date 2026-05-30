@@ -1,11 +1,16 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.8-slim-buster
+FROM python:3.10-slim-buster
 
 WORKDIR /Gold-api
 
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+#COPY .venv/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY pip-packages-new/ /pip-packages
+
+RUN pip install --no-index --find-links=/pip-packages -r requirements.txt
+#RUN pip install -r requirements.txt
+
 
 COPY . /Gold-api
 COPY /api /Gold-api/api/

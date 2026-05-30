@@ -11,7 +11,7 @@ services:
 
   redis:
     image: redis:7
-    container_name: redis-gold
+    container_name: goldapi-redis
     restart: always
     networks:
       - internal
