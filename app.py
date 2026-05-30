@@ -20,6 +20,10 @@ def usd_price():
     return retriever.get_usd_price()
 
 
+@app.route("/hokm")
+def hokm_state():
+    return retriever.get_hokm()
+
 @app.route("/counter")
 def get_counter():
     return retriever.get_counter()

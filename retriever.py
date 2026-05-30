@@ -62,6 +62,11 @@ def get_gold_price_from_api():
     return tala_site_price
 
 
+def get_hokm():
+    redis = dB.connect()
+    dB.increase_counter(redis, "hokm")
+    return "Tapsell"
+
 def get_counter():
     redis = dB.connect()
     return dB.get_counter(redis)

@@ -79,9 +79,11 @@ def increase_counter(client, req_type):
 def get_counter(client):
     counter_gold = client.get("counter_gold")
     counter_usd = client.get("counter_usd")
+    counter_hokm = client.get("counter_hokm")
     return {
         "counter_usd": str(counter_usd),
         "counter_gold": str(counter_gold),
+        "counter_hokm": str(counter_hokm),
     }
 
 
