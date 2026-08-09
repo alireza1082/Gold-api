@@ -63,8 +63,15 @@ def get_price_from_bonbast():
 
 
 def get_usd_brs():
+    _REQUEST_HEADERS = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+        ),
+        "Accept": "application/json, text/plain, */*",
+    }
     price = 0
-    url = "https://BrsApi.ir/Api/Market/Gold_Currency_Pro.php"
+    url = "https://api.BrsApi.ir/Market/Gold_Currency_Pro.php"
     # one-api token
     brs_key = config_api.brs_api_token
 
@@ -72,12 +79,8 @@ def get_usd_brs():
         'key': brs_key,
         'section': 'currency'
     }
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 OPR/106.0.0.0",
-        "Accept": "application/json, text/plain, */*"
-    }
 
-    response = requests.get(url, params=parameters, headers=headers)
+    response = requests.get(url, params=parameters, headers=_REQUEST_HEADERS)
 
     if response.status_code == 200:
         print("Successful brs request!")

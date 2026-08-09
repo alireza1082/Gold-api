@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: gold-price
+    restart: unless-stopped
     ports:
       - "8080:5000"
     networks:
@@ -12,7 +13,7 @@ services:
   redis:
     image: redis:7
     container_name: goldapi-redis
-    restart: always
+    restart: unless-stopped
     networks:
       - internal
 
