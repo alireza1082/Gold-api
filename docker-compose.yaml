@@ -5,17 +5,59 @@ services:
       dockerfile: Dockerfile
     container_name: gold-price
     restart: unless-stopped
+    init: true
     ports:
-      - "8080:5000"
+      - "8080:8000"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ONE_API_TOKEN: ${ONE_API_TOKEN:-}
+      BRS_API_TOKEN: ${BRS_API_TOKEN:-}
+      REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-10}
+    depends_on:
+      redis:
+        condition: service_healthy
+        restart: true
     networks:
       - internal
 
   redis:
-    image: redis:7
+    image: redis:7.4-alpine
     container_name: goldapi-redis
     restart: unless-stopped
+    init: true
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command:
+      - sh
+      - -c
+      - >-
+        if [ -n "$${REDIS_PASSWORD:-}" ]; then
+          exec redis-server --appendonly yes --requirepass "$${REDIS_PASSWORD}";
+        else
+          exec redis-server --appendonly yes;
+        fi
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          if [ -n "$${REDIS_PASSWORD:-}" ]; then
+            redis-cli -a "$${REDIS_PASSWORD}" ping;
+          else
+            redis-cli ping;
+          fi
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - internal
+
+volumes:
+  redis_data:
 
 networks:
   internal:

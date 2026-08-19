@@ -1,4 +1,6 @@
-/config/config_api.py
+.env
+.env.*
+!.env.example
 .idea
 __pycache__/
 api/__pycache__/

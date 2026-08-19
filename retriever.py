@@ -1,72 +1,115 @@
-from werkzeug.exceptions import abort
+"""Business logic for cached gold and USD prices."""
 
-import api.api_price as api
-import api.api_retrieve_site as api_scraper
-import database.redisCache as dB
+from __future__ import annotations
+
+import logging
+
+import api.api_price as price_api
+import api.api_retrieve_site as scraper
+import database.redisCache as cache
+
+logger = logging.getLogger(__name__)
 
 
-def get_gold_price():
-    redis = dB.connect()
-    dB.increase_counter(redis, "gold")
+class PriceUnavailableError(RuntimeError):
+    """Raised when neither a fresh external price nor a usable cached price exists."""
 
-    if dB.is_update_required(redis):
-        print("DB update required!")
+
+def _valid_price(value: str | int | float | None) -> str | None:
+    if value is None:
+        return None
+    try:
+        numeric = float(value)
+        return str(value) if numeric > 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def get_gold_price() -> str:
+    client = cache.connect()
+    cache.increase_counter(client, "gold")
+
+    if not cache.is_update_required(client):
+        last_price = _valid_price(cache.get_last_price(client))
+        if last_price is not None:
+            return last_price
+
+    with cache.refresh_lock(client, "gold") as lock_acquired:
+        if not lock_acquired:
+            stale_price = _valid_price(cache.get_last_price(client))
+            if stale_price is not None and cache.is_update_valid(client):
+                return stale_price
+            raise PriceUnavailableError("Gold price refresh is already in progress")
+
+        # Another worker may have refreshed the value while this request waited.
+        if not cache.is_update_required(client):
+            last_price = _valid_price(cache.get_last_price(client))
+            if last_price is not None:
+                return last_price
+
         price = get_gold_price_from_api()
         if price is not None:
-            print("returned price: " + str(price))
-            dB.update_last_price(redis, price)
+            cache.update_last_price(client, price)
             return price
-        if (price is None) and dB.is_update_valid(redis):
-            print("Api not responding and price is valid!!")
-            return dB.get_last_price(redis)
-        else:
-            abort(404, description="Resource not found")
-    else:
-        print("update not required")
-        return dB.get_last_price(redis)
+
+        stale_price = _valid_price(cache.get_last_price(client))
+        if stale_price is not None and cache.is_update_valid(client):
+            logger.warning("Returning valid stale gold price because providers failed")
+            return stale_price
+        raise PriceUnavailableError("Gold price is currently unavailable")
 
 
-def get_usd_price():
-    redis = dB.connect()
-    dB.increase_counter(redis, "usd")
+def get_usd_price() -> str:
+    client = cache.connect()
+    cache.increase_counter(client, "usd")
 
-    if dB.is_update_required_usd(redis):
-        print("DB update required for usd!")
-        price = api.get_usd_brs()
+    if not cache.is_update_required_usd(client):
+        last_price = _valid_price(cache.get_last_price_usd(client))
+        if last_price is not None:
+            return last_price
+
+    with cache.refresh_lock(client, "usd") as lock_acquired:
+        if not lock_acquired:
+            stale_price = _valid_price(cache.get_last_price_usd(client))
+            if stale_price is not None and cache.is_update_valid_usd(client):
+                return stale_price
+            raise PriceUnavailableError("USD price refresh is already in progress")
+
+        if not cache.is_update_required_usd(client):
+            last_price = _valid_price(cache.get_last_price_usd(client))
+            if last_price is not None:
+                return last_price
+
+        price = price_api.get_usd_brs()
         if price is not None:
-            print("returned price: " + str(price))
-            dB.update_last_price_usd(redis, price)
+            cache.update_last_price_usd(client, price)
             return price
-        if price is None:
-            print("Api brs not responding!!")
-            return dB.get_last_price_usd(redis)
-        else:
-            abort(404, description="Resource not found")
-    else:
-        print("update not required")
-        return dB.get_last_price_usd(redis)
+
+        stale_price = _valid_price(cache.get_last_price_usd(client))
+        if stale_price is not None and cache.is_update_valid_usd(client):
+            logger.warning("Returning valid stale USD price because provider failed")
+            return stale_price
+        raise PriceUnavailableError("USD price is currently unavailable")
 
 
-def get_gold_price_from_api():
-    tgju_site_price = api_scraper.get_tgju_price()
-    if tgju_site_price is not None:
-        tgju = tgju_site_price
-    else:
-        tgju = api.get_price_from_tgju()
-    tala_site_price = api_scraper.get_tala_price()
-    # bon_api_price = api.get_price_from_bonbast()
-    if tgju > tala_site_price:
-        return tgju
-    if tala_site_price == "0":
+def get_gold_price_from_api() -> str | None:
+    tgju = scraper.get_tgju_price()
+    if tgju is None:
+        tgju = price_api.get_price_from_tgju()
+    tala = scraper.get_tala_price()
+
+    candidates = [_valid_price(tgju), _valid_price(tala)]
+    candidates = [candidate for candidate in candidates if candidate is not None]
+    if not candidates:
         return None
-    return tala_site_price
+    return max(candidates, key=float)
 
 
-def get_hokm():
-    redis = dB.connect()
-    dB.increase_counter(redis, "hokm")
+def get_hokm() -> str:
+    client = cache.connect()
+    cache.increase_counter(client, "hokm")
     return "Tapsell"
 
-def get_counter():
-    redis = dB.connect()
-    return dB.get_counter(redis)
+
+def get_counter() -> dict[str, str]:
+    return cache.get_counter(cache.connect())

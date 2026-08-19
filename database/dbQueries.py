@@ -1,67 +1,76 @@
-from datetime import datetime
+"""Legacy MongoDB helpers.
+
+The current API uses Redis only. These helpers remain for compatibility with any
+external callers, but use one client per explicit call and fail safely on empty data.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import time
+from typing import Any
 
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
 import database.consts as consts
 
+logger = logging.getLogger(__name__)
 
-def connect():
+
+def connect() -> MongoClient | None:
+    """Create a MongoDB client using MONGO_URI, without attempting an unbounded call."""
     try:
-        time = datetime.now().timestamp()
-        # Connect with the port number and host
-        command_client = MongoClient("mongodb://localhost:27017/")
-        client = MongoClient("localhost", 27017)
-        print("Connected to DB successfully")
-        print(time - datetime.now().timestamp())
+        client = MongoClient(
+            os.getenv("MONGO_URI", "mongodb://localhost:27017/"),
+            serverSelectionTimeoutMS=3000,
+            connectTimeoutMS=3000,
+        )
+        client.admin.command("ping")
         return client
-    except PyMongoError as error:
-        print("Could not connect to MongoDB with error: ", error)
+    except PyMongoError:
+        logger.warning("Could not connect to MongoDB", exc_info=True)
         return None
 
 
-def get_last_price(client):
-    # Access database
-    database = client.gold_db
-
-    # Access collection of the database
-    collection = database["gold_price"]
-
-    return collection.find_one().get("price")
+def get_last_price(client: MongoClient | None) -> Any:
+    if client is None:
+        return None
+    document = client.gold_db["gold_price"].find_one(consts.BASE_DIC)
+    return document.get("price") if document else None
 
 
-def is_update_required(client):
-    collection = client.gold_db["gold_price"]
-
-    last_update_time = collection.find_one().get("time")
-
-    if last_update_time is None:
+def is_update_required(client: MongoClient | None) -> bool:
+    if client is None:
         return True
-    elif datetime.now().timestamp() - consts.BASE_TIME > last_update_time:
-        return True
-    else:
+    document = client.gold_db["gold_price"].find_one(consts.BASE_DIC)
+    last_update = document.get("time") if document else None
+    return last_update is None or time.time() - consts.BASE_TIME > last_update
+
+
+def is_update_valid(client: MongoClient | None) -> bool:
+    if client is None:
         return False
+    document = client.gold_db["gold_price"].find_one(consts.BASE_DIC)
+    last_update = document.get("time") if document else None
+    return last_update is not None and time.time() - consts.MAX_VALID_TIME < last_update
 
-def is_update_valid(client):
-    collection = client.gold_db["gold_price"]
 
-    last_update_time = collection.find_one().get("time")
+def get_dict(price: Any) -> dict[str, Any]:
+    return {"name": "LastGoldPrice", "price": price, "time": time.time()}
 
-    if last_update_time is None:
+
+def update_last_price(client: MongoClient | None, price: Any) -> bool:
+    if client is None:
         return False
-    elif datetime.now().timestamp() - consts.MAX_VALID_TIME < last_update_time:
-        return True
-    else:
+    try:
+        result = client.gold_db["gold_price"].update_one(
+            consts.BASE_DIC,
+            {"$set": {"price": price, "time": time.time()}},
+            upsert=True,
+        )
+        return result.acknowledged
+    except PyMongoError:
+        logger.warning("Could not update MongoDB gold price", exc_info=True)
         return False
-
-def get_dict(price):
-    mydict = {"name": "LastGoldPrice", "price": price, "time": datetime.now().timestamp()}
-    return mydict
-
-
-def update_last_price(client, price):
-    collection = client.gold_db["gold_price"]
-    collection.update_one(
-        consts.BASE_DIC,
-        {"$set": {"price": price, "time": datetime.now().timestamp()}},
-    )
