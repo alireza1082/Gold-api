@@ -57,17 +57,23 @@ services:
         condition: service_completed_successfully
     ports:
       - "8080:8080"
+      - "443:8443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     healthcheck:
       test:
-        - CMD-SHELL
-        - wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/health || exit 1
-      interval: 10s
-      timeout: 5s
-      retries: 5
+        - CMD
+        - caddy
+        - validate
+        - --config
+        - /etc/caddy/Caddyfile
+        - --adapter
+        - caddyfile
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 10s
     networks:
       - internal

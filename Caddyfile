@@ -1,3 +1,14 @@
-:8080 {
+{
+	auto_https disable_redirects
+}
+
+gold.benjiro.ir:8080 {
+	tls {
+		issuer acme {
+			disable_http_challenge
+			alt_tlsalpn_port 8443
+		}
+	}
+
 	reverse_proxy gold:8000
 }
