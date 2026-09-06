@@ -1,4 +1,26 @@
 services:
+  caddy:
+    image: caddy:2.10-alpine
+    container_name: goldapi-caddy
+    restart: unless-stopped
+    init: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - wget --no-verbose --tries=1 --spider http://127.0.0.1:8080/health || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+
   gold:
     build:
       context: .
@@ -6,8 +28,8 @@ services:
     container_name: gold-price
     restart: unless-stopped
     init: true
-    ports:
-      - "8080:8000"
+    expose:
+      - "8000"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -57,6 +79,8 @@ services:
       - internal
 
 volumes:
+  caddy_data:
+  caddy_config:
   redis_data:
 
 networks:

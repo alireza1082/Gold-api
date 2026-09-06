@@ -27,6 +27,6 @@ Set `ONE_API_TOKEN` and `BRS_API_TOKEN` in the shell or a local `.env` file, the
 docker compose up --build -d
 ```
 
-The API is exposed on port `8080`; Redis is internal-only, supports the optional `REDIS_PASSWORD`, and persists in the `redis_data` volume.
+Caddy is exposed on host port `8080` and reverse proxies to the internal Gold API on `gold:8000`; Flask/Gunicorn and Redis are not published on host ports. Redis supports the optional `REDIS_PASSWORD` and persists in the `redis_data` volume.
 
 Provider credentials are intentionally loaded only from environment variables and are never stored in the repository.
