@@ -9,6 +9,7 @@ services:
       - ALL
     cap_add:
       - CHOWN
+      - DAC_OVERRIDE
     security_opt:
       - no-new-privileges:true
     mem_limit: 32m

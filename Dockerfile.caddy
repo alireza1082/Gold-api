@@ -2,7 +2,10 @@
 
 FROM caddy:2.10-alpine
 
-RUN addgroup -S -g 10001 caddy \
+RUN apk add --no-cache libcap \
+    && setcap -r /usr/bin/caddy \
+    && apk del libcap \
+    && addgroup -S -g 10001 caddy \
     && adduser -S -D -H -u 10001 -G caddy caddy \
     && chown -R caddy:caddy /data /config /etc/caddy
 
