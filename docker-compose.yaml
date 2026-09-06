@@ -1,9 +1,59 @@
 services:
+  caddy-init:
+    image: alpine:3.22
+    container_name: goldapi-caddy-init
+    restart: "no"
+    user: "0:0"
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 32m
+    cpus: 0.10
+    pids_limit: 20
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: "2"
+    command:
+      - sh
+      - -c
+      - chown -R 10001:10001 /data /config
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+
   caddy:
-    image: caddy:2.10-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+    image: gold-api-caddy:local
     container_name: goldapi-caddy
+    user: "10001:10001"
     restart: unless-stopped
     init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    mem_limit: 128m
+    cpus: 0.50
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    depends_on:
+      caddy-init:
+        condition: service_completed_successfully
     ports:
       - "8080:8080"
     volumes:
@@ -28,6 +78,21 @@ services:
     container_name: gold-price
     restart: unless-stopped
     init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev
+    mem_limit: 512m
+    cpus: 1.00
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     expose:
       - "8000"
     environment:
@@ -50,6 +115,19 @@ services:
     container_name: goldapi-redis
     restart: unless-stopped
     init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.50
+    pids_limit: 100
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     command:
