@@ -69,7 +69,9 @@ def refresh_lock(
             acquired = bool(lock.acquire(blocking=True))
         except RedisError:
             logger.warning("Redis refresh lock failed for %s", name, exc_info=True)
-            acquired = True
+            # Preserve the fail-open refresh behavior without claiming lock ownership.
+            yield True
+            return
         yield acquired
     finally:
         if acquired:

@@ -56,6 +56,26 @@ class CacheTests(unittest.TestCase):
         self.assertEqual(client.incr_calls, ["counter_gold", "counter_gold"])
         self.assertEqual(cache.get_counter(client)["counter_gold"], "2")
 
+    def test_refresh_lock_does_not_release_after_acquire_error(self):
+        class FailedRedis:
+            def lock(self, *_args, **_kwargs):
+                class FailedLock:
+                    released = False
+
+                    def acquire(self, **_kwargs):
+                        raise cache.RedisError("Redis unavailable")
+
+                    def release(self):
+                        self.released = True
+
+                self.failed_lock = FailedLock()
+                return self.failed_lock
+
+        client = FailedRedis()
+        with cache.refresh_lock(client, "gold") as acquired:
+            self.assertTrue(acquired)
+        self.assertFalse(client.failed_lock.released)
+
     def test_refresh_lock_reports_when_another_worker_owns_lock(self):
         class LockedRedis:
             def lock(self, *_args, **_kwargs):
