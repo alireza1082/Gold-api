@@ -6,7 +6,8 @@ import logging
 
 import api.api_price as price_api
 import api.api_retrieve_site as scraper
-import database.redisCache as cache
+import config.config_api as conf
+import database.redis_handler as cache
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +109,13 @@ def get_gold_price_from_api() -> str | None:
 def get_hokm() -> str:
     client = cache.connect()
     cache.increase_counter(client, "hokm")
-    return "Tapsell"
+    return conf.get_hokm_string()
+
+
+def get_xo() -> str:
+    client = cache.connect()
+    cache.increase_counter(client, "xo")
+    return conf.get_xo_string()
 
 
 def get_counter() -> dict[str, str]:

@@ -110,6 +110,10 @@ services:
       ONE_API_TOKEN: ${ONE_API_TOKEN:-}
       BRS_API_TOKEN: ${BRS_API_TOKEN:-}
       REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-10}
+      HOKM_STRING: ${HOKM_STRING:-}
+      XO_STRING: ${XO_STRING:-}
+    volumes:
+      - ./.env:/app/.env:ro
     depends_on:
       redis:
         condition: service_healthy

@@ -148,7 +148,7 @@ def update_last_price(client: redis.Redis | None, price: str | int | float) -> b
 
 def increase_counter(client: redis.Redis | None, req_type: str) -> bool:
     """Atomically increment a request counter, avoiding GET/SET lost updates."""
-    if client is None or req_type not in {"gold", "usd", "hokm"}:
+    if client is None or req_type not in {"gold", "usd", "hokm", "xo"}:
         return False
     try:
         client.incr(f"counter_{req_type}")
@@ -163,7 +163,7 @@ def increase_counter(client: redis.Redis | None, req_type: str) -> bool:
 
 
 def get_counter(client: redis.Redis | None) -> dict[str, str]:
-    keys = ("counter_usd", "counter_gold", "counter_hokm")
+    keys = ("counter_usd", "counter_gold", "counter_hokm", "counter_xo")
     values = [_get(client, key) or "0" for key in keys]
     return dict(zip(keys, values))
 

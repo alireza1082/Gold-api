@@ -14,7 +14,8 @@ Endpoints:
 - `GET /gold` — cached/fresh 18k gold price
 - `GET /usd` — cached/fresh USD price
 - `GET /hokm` — compatibility endpoint
-- `GET /counter` — request counters for all three routes
+- `GET /xo` — compatibility endpoint
+- `GET /counter` — request counters for all four routes
 - `GET /health` — Redis readiness check
 
 Cache TTLs and stale-data windows are configurable through `.env.example`; the defaults preserve the existing gold (15 minutes) and USD (10 minutes) refresh behavior.

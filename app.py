@@ -6,7 +6,7 @@ import logging
 
 from flask import Flask, jsonify
 
-import database.redisCache as cache
+import database.redis_handler as cache
 import retriever
 
 logging.basicConfig(
@@ -66,6 +66,11 @@ def usd_price():
 @app.route("/hokm", methods=["GET"])
 def hokm_state():
     return retriever.get_hokm()
+
+
+@app.route("/xo", methods=["GET"])
+def xo_state():
+    return retriever.get_xo()
 
 
 @app.route("/counter", methods=["GET"])
