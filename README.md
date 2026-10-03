@@ -4,7 +4,7 @@ A small synchronous Flask API that returns cached 18k gold and USD prices.
 
 ## Run locally
 
-1. Copy `.env.example` to `.env` and provide provider credentials if external refreshes are needed.
+1. Copy `.env.example` to `.env`; `ONE_API_TOKEN` is used only as a gold-price fallback.
 2. Start Redis (`redis-server`) or set `REDIS_HOST` to an accessible Redis instance.
 3. Install dependencies with `pip install -r requirements.txt`.
 4. Start the service with `gunicorn --bind 0.0.0.0:8000 app:app`.
@@ -18,11 +18,11 @@ Endpoints:
 - `GET /counter` — request counters for all four routes
 - `GET /health` — Redis readiness check
 
-Cache TTLs and stale-data windows are configurable through `.env.example`; the defaults preserve the existing gold (15 minutes) and USD (10 minutes) refresh behavior.
+Cache TTLs and stale-data windows are configurable through `.env.example`; gold refreshes every 15 minutes and USD refreshes every 30 minutes by default.
 
 ## Docker Compose
 
-Set `ONE_API_TOKEN` and `BRS_API_TOKEN` in the shell or a local `.env` file, then run:
+Set `ONE_API_TOKEN` in the shell or a local `.env` file if the gold API fallback is needed, then run:
 
 ```bash
 docker compose up --build -d

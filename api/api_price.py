@@ -11,7 +11,6 @@ from config import config_api
 
 logger = logging.getLogger(__name__)
 ONE_API_URL = "https://one-api.ir/price/"
-BRS_API_URL = "https://api.BrsApi.ir/Market/Gold_Currency_Pro.php"
 
 
 def _parse_api_price(raw_value: Any, trailing_digits: int) -> str | None:
@@ -71,30 +70,3 @@ def get_price_from_bonbast() -> str | None:
     except (KeyError, TypeError):
         logger.warning("Malformed Bonbast response from One API")
         return None
-
-
-def get_usd_brs() -> str | None:
-    if not config_api.brs_api_token:
-        logger.error("BRS_API_TOKEN is not configured")
-        return None
-    headers = {
-        "User-Agent": "gold-api/1.0",
-        "Accept": "application/json",
-    }
-    try:
-        response = requests.get(
-            BRS_API_URL,
-            params={"key": config_api.brs_api_token, "section": "currency"},
-            headers=headers,
-            timeout=config_api.request_timeout,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        entries = payload["currency"]["free"]
-        for entry in entries:
-            if isinstance(entry, dict) and entry.get("symbol") == "USD":
-                price = float(entry["price"])
-                return str(int(price / 10))
-    except (requests.RequestException, ValueError, KeyError, TypeError) as exc:
-        logger.warning("BRS USD request failed; error_type=%s", type(exc).__name__)
-    return None
