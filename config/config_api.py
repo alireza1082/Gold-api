@@ -22,6 +22,10 @@ def _get_float(name: str, default: float, minimum: float = 0.1) -> float:
 
 
 api_token = os.getenv("ONE_API_TOKEN", "").strip()
+public_base_url = (
+    os.getenv("PUBLIC_BASE_URL", "https://gold.benjiro.ir:8080").strip().rstrip("/")
+    or "https://gold.benjiro.ir:8080"
+)
 
 # localhost keeps local development convenient; Compose overrides this with "redis".
 redis_host = os.getenv("REDIS_HOST", "localhost").strip() or "localhost"

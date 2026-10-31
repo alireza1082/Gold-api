@@ -7,6 +7,7 @@ import logging
 from flask import Flask, jsonify
 
 import database.redis_handler as cache
+import api.api_promo as promo
 import retriever
 
 logging.basicConfig(
@@ -71,6 +72,26 @@ def hokm_state():
 @app.route("/xo", methods=["GET"])
 def xo_state():
     return retriever.get_xo()
+
+
+@app.route("/hokm-ad", methods=["GET"])
+def hokm_ad():
+    return promo.metadata_response("hokm")
+
+
+@app.route("/xo-ad", methods=["GET"])
+def xo_ad():
+    return promo.metadata_response("xo")
+
+
+@app.route("/hokm-ad/image", methods=["GET"])
+def hokm_ad_image():
+    return promo.image_response("hokm")
+
+
+@app.route("/xo-ad/image", methods=["GET"])
+def xo_ad_image():
+    return promo.image_response("xo")
 
 
 @app.route("/counter", methods=["GET"])

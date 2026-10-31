@@ -109,10 +109,12 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       ONE_API_TOKEN: ${ONE_API_TOKEN:-}
       REQUEST_TIMEOUT_SECONDS: ${REQUEST_TIMEOUT_SECONDS:-10}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-}
       HOKM_STRING: ${HOKM_STRING:-}
       XO_STRING: ${XO_STRING:-}
     volumes:
       - ./.env:/app/.env:ro
+      - ./promo:/app/promo:ro
     depends_on:
       redis:
         condition: service_healthy
